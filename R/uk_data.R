@@ -84,7 +84,5 @@ ggplot(data = t_complete_unsuc, mapping = aes(x=tender_value_amount)) +
 
 ggplot(data = t_complete_unsuc, mapping=aes(x=tender_value_amount))
 
-fit_lm <- lm(tender_value_amount ~ tender_status, data = t_complete_unsuc)
-fit_lm
-summary(fit_lm)
-plot(fit_lm)
+# export the cleaned data
+write.csv(cleaned_data, "../Demonstrator-main/data/uk_tenders_cleaned.csv")
