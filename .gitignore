@@ -3,3 +3,7 @@ data/*
 
 .Rproj.user
 Demonstrator-main.Rproj
+
+
+
+local_packages/*
