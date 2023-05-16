@@ -1,5 +1,5 @@
 # Demonstrator
 
-Some code to extract OCDS data for Uganda to process
+Some early dev code to extract OCDS data to explore for red flags.
 
-More info: https://www.open-contracting.org/data/
+Starts with Uganda - more info: https://www.open-contracting.org/data/
