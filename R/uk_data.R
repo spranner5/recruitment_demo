@@ -1,30 +1,51 @@
-# Uses UK OCDS open contracting data from https://data.open-contracting.org/en/search/
-# extracted into individual csvs
+# Uses UK OCDS open contracting data download from https://data.open-contracting.org/en/search/
+# CSV zip extracted into individual csvs
+# This file extracts tenders from main.csvs 2023
 
 library(sqldf)
 library(dplyr)
-library(rjson)
 library(ggplot2)
+library(naniar)
+library(tidyr)
+
+
+# load main.csv if not already parsed tenders
+main <- read.csv("data/main.csv")
+
+head(main)
+dim(main)
+
+# cols
+colnames(main)
+
+# remove some unneeded cols
+main <- select(main, id, date, ocid, tender_id, tender_title, tender_status, tender_description, tender_value_amount, tender_value_currency, tender_suitability_sme)
+  
+ 
+# save out to tenders
+write.csv(tenders, "../data/uk_tenders_cleaned.csv")
 
 # load tenders data
-tenders <- read.csv("data/tenders.csv")
+tenders <- read.csv("../data/tenders.csv")
 
 # check colnames
 colnames(tenders)
 
 # OK, accessible
-# blanks
-tenders[tenders = ""] <- NA
+# look at missing values
+miss_var_summary(tenders)
 
-# count of tenders suitable/not suitable / not stated
-rowSums(is.na(tenders))
+# many missing in tender_value_amount, maybe due to status?
+empty <- filter(group_status, is.na(tender_value_amount))
+empty %>%
+  group_by(tender_status) %>%
+  summarize(count = n())
+# not just status, so caution required 
 
-cleaned_data <- tenders[rowSums(is.na(tenders)) != ncol(tenders), ] # drop empty
+# but otherwise a handful with descr and id
+cleaned_data <- drop_na(tenders, c("tender_description", "tender_id"))
 
-library(dplyr)
-tenders %>% 
-  group_by(issuitableforsme) %>%
-  summarise(n_rows = length(issuitableforsme))
+cleaned_data_no_missing_t_vals <- drop_na(tenders, c("tender_value_amount"))
 
 # summary stats
 cleaned_data %>%
@@ -32,21 +53,21 @@ cleaned_data %>%
   summary()
 
 # spread of tender values
-plot(cleaned_data$tender_value_amount)
+plot(cleaned_data_no_missing_t_vals$tender_value_amount)
 
-# outliers! barplot
-cleaned_data[cleaned_data$issuitableforsme] %>%
-  ggplot(aes(x=tender_value_amount, y=issuitableforsme)) + geom_col
+# outliers! 
+cleaned_data_no_missing_t_vals %>%
+  ggplot(aes(x=tender_value_amount, y=tender_suitability_sme)) + geom_col()
 
-
-# summary of suitable for SME or not
+# look at some groups
+library(dplyr)
 cleaned_data %>% 
-  group_by(issuitableforsme) %>%
-  summarise(n_rows = length(issuitableforsme))
+  group_by(tender_suitability_sme) %>%
+  summarise(n_rows = length(tender_suitability_sme))
 
-# 997 blanks
+# 8 blanks
 
-# data set also unscuccessful tenders
+# also unscuccessful tenders
 cleaned_data %>% 
   group_by(tender_status) %>%
   summarise(n_rows = length(tender_status))
@@ -55,9 +76,8 @@ ggplot(data = cleaned_data) +
   geom_bar(mapping = aes(x=tender_status))
 
 ggplot(data = cleaned_data) +
-  geom_bar(mapping = aes(x=issuitableforsme))
+  geom_bar(mapping = aes(x=tender_suitability_sme))
 
-# restrict set to just complete/unsuccessful for now
 t_complete_unsuc = cleaned_data %>%
   filter(tender_status == "complete" | tender_status == "unsuccessful")
 
@@ -65,26 +85,28 @@ t_complete_unsuc = cleaned_data %>%
 t_complete_unsuc %>%
   group_by(tender_value_currency) %>%
   summarise(n_rows = length(tender_value_currency))
-# all GBP so no conversion needed
+#mostly GBP but missing 2792 so caution needed for dealing with amounts
 
 ggplot(data = t_complete_unsuc) +
   geom_bar(mapping = aes(x=tender_status, color=tender_value_amount))
+# only complete in 2023 dataset
 
 ggplot(data=t_complete_unsuc, mapping=aes(y=tender_value_amount, x=tender_status)) + 
   geom_boxplot()
 
-# see what lower end looks like
+# explore lower vals to see spread 
 lower_val <- t_complete_unsuc %>%
   filter(tender_value_amount < 10000000)
 
 ggplot(data=lower_val, mapping=aes(y=tender_value_amount, x=tender_status)) + 
   geom_boxplot()
 
-# value by sme
-ggplot(data = t_complete_unsuc, mapping = aes(x=tender_value_amount)) + 
-  geom_freqpoly(mapping = aes(colour = issuitableforsme))
 
-ggplot(data = t_complete_unsuc, mapping=aes(x=tender_value_amount))
+# value by sme
+sqldf("select sum(tender_value_amount), tender_suitability_sme from t_complete_unsuc group by tender_suitability_sme")
+sqldf("select max(tender_value_amount) as max, min(tender_value_amount) as min, tender_suitability_sme from t_complete_unsuc group by tender_suitability_sme")
+
+# some implausible vals
 
 # export the cleaned data
-write.csv(cleaned_data, "../data/uk_tenders_cleaned.csv")
+write.csv(cleaned_data, "data/uk_tenders_cleaned.csv")
