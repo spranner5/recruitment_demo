@@ -1,3 +1,6 @@
+# Uses UK OCDS open contracting data from https://data.open-contracting.org/en/search/
+# extracted into individual csvs
+
 library(sqldf)
 library(dplyr)
 library(rjson)
@@ -84,4 +87,4 @@ ggplot(data = t_complete_unsuc, mapping = aes(x=tender_value_amount)) +
 ggplot(data = t_complete_unsuc, mapping=aes(x=tender_value_amount))
 
 # export the cleaned data
-write.csv(cleaned_data, "../Demonstrator-main/data/uk_tenders_cleaned.csv")
+write.csv(cleaned_data, "../data/uk_tenders_cleaned.csv")
