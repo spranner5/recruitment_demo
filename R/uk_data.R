@@ -36,14 +36,14 @@ cleaned_data[cleaned_data$issuitableforsme] %>%
   ggplot(aes(x=tender_value_amount, y=issuitableforsme)) + geom_col
 
 
-
+# summary of suitable for SME or not
 cleaned_data %>% 
   group_by(issuitableforsme) %>%
   summarise(n_rows = length(issuitableforsme))
 
 # 997 blanks
 
-# also unscuccessful tenders
+# data set also unscuccessful tenders
 cleaned_data %>% 
   group_by(tender_status) %>%
   summarise(n_rows = length(tender_status))
@@ -54,6 +54,7 @@ ggplot(data = cleaned_data) +
 ggplot(data = cleaned_data) +
   geom_bar(mapping = aes(x=issuitableforsme))
 
+# restrict set to just complete/unsuccessful for now
 t_complete_unsuc = cleaned_data %>%
   filter(tender_status == "complete" | tender_status == "unsuccessful")
 
@@ -61,7 +62,7 @@ t_complete_unsuc = cleaned_data %>%
 t_complete_unsuc %>%
   group_by(tender_value_currency) %>%
   summarise(n_rows = length(tender_value_currency))
-# all GBP 
+# all GBP so no conversion needed
 
 ggplot(data = t_complete_unsuc) +
   geom_bar(mapping = aes(x=tender_status, color=tender_value_amount))
@@ -69,14 +70,12 @@ ggplot(data = t_complete_unsuc) +
 ggplot(data=t_complete_unsuc, mapping=aes(y=tender_value_amount, x=tender_status)) + 
   geom_boxplot()
 
+# see what lower end looks like
 lower_val <- t_complete_unsuc %>%
   filter(tender_value_amount < 10000000)
 
 ggplot(data=lower_val, mapping=aes(y=tender_value_amount, x=tender_status)) + 
   geom_boxplot()
-
-
-
 
 # value by sme
 ggplot(data = t_complete_unsuc, mapping = aes(x=tender_value_amount)) + 
