@@ -2,6 +2,4 @@
 
 This is a demo project not intended to be production ready code.
 
-Some early dev code to extract OCDS data to explore for red flags.
-
-Starts with Uganda - more info: https://www.open-contracting.org/data/
+The project contains R code to pre-process Uganda and UK data downloaded from https://www.open-contracting.org/data/ and Python code to explore the data.

@@ -14,9 +14,9 @@ install.packages('DT')
 
 #jsonl format
 
-#test <-read.csv("../Demonstrator-main/data/test.csv")
+#test <-read.csv("../data/test.csv")
 
-lines <- readLines("../Demonstrator-main/data/uganda_releases_2022.jsonl/2022.jsonl")
+lines <- readLines("../data/uganda_releases_2022.jsonl/2022.jsonl")
 lines <- lapply(lines, fromJSON)
 lines <- lapply(lines, unlist)
 x <- bind_rows(lines)
@@ -84,7 +84,7 @@ sum(!complete.cases(bids[-1]))
 bids_complete <- bids %>% drop_na() 
 
 # save bid details by month
-write.csv(bids, "../Demonstrator-main/output/uganda_22_bids.csv")
+write.csv(bids, "../data/uganda_22_bids.csv")
 
 # awards
 awards <- uganda_data[, c('ocid', 'date', 'tag', 'awards.id', 'awards.date',
@@ -93,14 +93,16 @@ awards <- uganda_data[, c('ocid', 'date', 'tag', 'awards.id', 'awards.date',
 
 sum(!complete.cases(awards[-1]))
 awards <- awards %>% drop_na() 
-write.csv(awards, "../Demonstrator-main/output/uganda_22_awards.csv")
+write.csv(awards, "../data/uganda_22_awards.csv")
 
 # buyers
 buyers <- uganda_data[, c('ocid', 'date', 'buyer.id', 'buyer.name')]
 
 sum(!complete.cases(buyers[-1]))
 buyers <- buyers %>% drop_na() 
-write.csv(buyers, "../Demonstrator-main/output/uganda_22_buyers.csv")
+
+# save data back out
+write.csv(buyers, "../data/uganda_22_buyers.csv")
  
 
  
