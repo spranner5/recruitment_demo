@@ -1,3 +1,6 @@
+# Uses UK OCDS open contracting data from https://data.open-contracting.org/en/search/
+# extracted into individual csvs
+
 library(sqldf)
 library(dplyr)
 library(rjson)
@@ -74,8 +77,6 @@ lower_val <- t_complete_unsuc %>%
 
 ggplot(data=lower_val, mapping=aes(y=tender_value_amount, x=tender_status)) + 
   geom_boxplot()
-
-
 
 
 # value by sme
