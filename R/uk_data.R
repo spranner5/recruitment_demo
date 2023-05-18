@@ -10,23 +10,22 @@ library(tidyr)
 
 
 # load main.csv if not already parsed tenders
-main <- read.csv("data/main.csv")
+#main <- read.csv("../data/main.csv")
 
-head(main)
-dim(main)
+#head(main)
+#dim(main)
 
 # cols
-colnames(main)
+#colnames(main)
 
 # remove some unneeded cols
-main <- select(main, id, date, ocid, tender_id, tender_title, tender_status, tender_description, tender_value_amount, tender_value_currency, tender_suitability_sme)
+#main <- select(main, id, date, ocid, tender_id, tender_title, tender_status, tender_description, tender_value_amount, tender_value_currency, tender_suitability_sme)
   
- 
 # save out to tenders
-write.csv(tenders, "../data/uk_tenders_cleaned.csv")
+#write.csv(main, "../data/uk_tenders_cleaned.csv")
 
-# load tenders data
-tenders <- read.csv("../data/tenders.csv")
+# otherwise load tenders data
+tenders <- read.csv("../data/uk_tenders_cleaned.csv")  
 
 # check colnames
 colnames(tenders)
@@ -36,7 +35,7 @@ colnames(tenders)
 miss_var_summary(tenders)
 
 # many missing in tender_value_amount, maybe due to status?
-empty <- filter(group_status, is.na(tender_value_amount))
+empty <- filter(tenders, is.na(tender_value_amount))
 empty %>%
   group_by(tender_status) %>%
   summarize(count = n())
@@ -67,7 +66,7 @@ cleaned_data %>%
 
 # 8 blanks
 
-# also unscuccessful tenders
+# also unscuccessful tenders?
 cleaned_data %>% 
   group_by(tender_status) %>%
   summarise(n_rows = length(tender_status))
@@ -87,21 +86,6 @@ t_complete_unsuc %>%
   summarise(n_rows = length(tender_value_currency))
 #mostly GBP but missing 2792 so caution needed for dealing with amounts
 
-ggplot(data = t_complete_unsuc) +
-  geom_bar(mapping = aes(x=tender_status, color=tender_value_amount))
-# only complete in 2023 dataset
-
-ggplot(data=t_complete_unsuc, mapping=aes(y=tender_value_amount, x=tender_status)) + 
-  geom_boxplot()
-
-# explore lower vals to see spread 
-lower_val <- t_complete_unsuc %>%
-  filter(tender_value_amount < 10000000)
-
-ggplot(data=lower_val, mapping=aes(y=tender_value_amount, x=tender_status)) + 
-  geom_boxplot()
-
-
 # value by sme
 sqldf("select sum(tender_value_amount), tender_suitability_sme from t_complete_unsuc group by tender_suitability_sme")
 sqldf("select max(tender_value_amount) as max, min(tender_value_amount) as min, tender_suitability_sme from t_complete_unsuc group by tender_suitability_sme")
@@ -109,4 +93,4 @@ sqldf("select max(tender_value_amount) as max, min(tender_value_amount) as min, 
 # some implausible vals
 
 # export the cleaned data
-write.csv(cleaned_data, "data/uk_tenders_cleaned.csv")
+write.csv(cleaned_data, "../data/uk_tenders_cleaned.csv")
